@@ -17,7 +17,7 @@ LibSmartCursor provides a **Smart Cursor Registry** that allows any number of mo
 - **Simple API** - Implementing new smart cursor appliances is trivial. Override a single method to have a working appliance ready to be registered. You get the tile search algorithm for free.
 
 ## Examples
-For some example implementations, check out my other mod [Smart Cursor Rewritten](https://github.com/km-clay/SmartCursorRewritten), which includes:
+For some example implementations, check out my other mod [Smart Cursor Tweaks](https://github.com/km-clay/SmartCursorTweaks), which includes:
 - **Rope Placement** - Targets ropes in the world while you have rope equipped.
 - **Hellevator Guide** - Ensures that your hellevator is aligned as you dig it, so you no longer have to eyeball alignment.
 - **Vein Mining** - Uses a stateful implementation to find all tiles in an ore vein and heavily prioritize them.
