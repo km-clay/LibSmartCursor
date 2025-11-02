@@ -1,0 +1,3 @@
+displayName = LibSmartCursor
+author = pagedMov
+version = 0.1
