@@ -23,3 +23,5 @@ For some example implementations, check out my other mod [Smart Cursor Rewritten
 - **Vein Mining** - Uses a stateful implementation to find all tiles in an ore vein and heavily prioritize them.
 
 ## Quick Start
+
+See [QUICKSTART.md](https://github.com/km-clay/LibSmartCursor/blob/main/QUICKSTART.md)
