@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LibSmartCursor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b9307ed9e4272e6cd735d5ca6fa89772f1878d54")]
 [assembly: System.Reflection.AssemblyProductAttribute("LibSmartCursor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LibSmartCursor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

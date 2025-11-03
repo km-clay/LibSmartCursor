@@ -1,1 +1,1 @@
-Modify this file with a description of your mod.
+A library for easily customizing and extending smart cursor behaviors. This mod does nothing on it's own, and only provides tools for other modders to add new smart cursor behaviors to items.

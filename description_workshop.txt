@@ -1,1 +1,8 @@
-This description will show up on the steam page, check out https://steamcommunity.com/comment/Guide/formattinghelp.
+[p]A library for easily customizing and extending smart cursor behaviors.[/p]
+
+[p]This mod does nothing on it's own, and only provides tools for other modders to add new smart cursor behaviors to items.[/p]
+
+[p]Exposes a smart cursor "registry" that allows registration of many different smart cursor behaviors. The system is designed to provide an interface for mods to easily alter smart cursor logic without using detours or hooks, which hurt compatibility.[/p]
+
+More details and documentation can be found on the GitHub page: https://github.com/km-clay/LibSmartCursor/
+Used to create my other mod [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3598787459]Smart Cursor Tweaks[/url]

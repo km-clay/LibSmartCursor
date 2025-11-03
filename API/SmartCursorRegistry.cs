@@ -5,11 +5,19 @@ using Terraria.ModLoader;
 
 namespace LibSmartCursor.API {
 	/// <summary>
+	/// Handle representing a registered smart cursor appliance.
+	/// Can be used to unregister appliances in the future.
+	/// </summary>
+	public class ApplianceHandle {
+		internal int id;
+	}
+	/// <summary>
 	/// Registry for smart cursor appliances.
 	/// Manages registration and lookup of appliances based on item predicates and priority.
 	/// Accessed via LibSmartCursor.LibSmartCursor.Registry.
 	/// </summary>
 	public class SmartCursorRegistry {
+		private static int nextHandleId = 0;
 		/// <summary>
 		/// High priority (25). Best used for highly specific or situational smart cursor behaviors.
 		/// Lower numbers execute first.
@@ -28,7 +36,7 @@ namespace LibSmartCursor.API {
 		public const int PRIORITY_LOW = 75;
 
 
-		private SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance)>> rulesByPriority;
+		private SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance, int)>> rulesByPriority;
 
 		/// <summary>
 		/// Registers a smart cursor appliance with the given item predicate and priority.
@@ -48,16 +56,29 @@ namespace LibSmartCursor.API {
 		/// );
 		/// </code>
 		/// </example>
-		public void RegisterAppliance(Func<Item,bool> itemPredicate, SmartCursorAppliance appliance, int priority = PRIORITY_NORMAL) {
+		public ApplianceHandle RegisterAppliance(Func<Item,bool> itemPredicate, SmartCursorAppliance appliance, int priority = PRIORITY_NORMAL) {
+			int id = nextHandleId++;
 			if (rulesByPriority == null) {
-				rulesByPriority = new SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance)>>();
+				rulesByPriority = new SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance, int)>>();
 			}
 
 			if (!rulesByPriority.ContainsKey(priority)) {
-				rulesByPriority[priority] = new List<(Func<Item,bool>, SmartCursorAppliance)>();
+				rulesByPriority[priority] = new List<(Func<Item,bool>, SmartCursorAppliance, int)>();
 			}
 
-			rulesByPriority[priority].Add((itemPredicate, appliance));
+			rulesByPriority[priority].Add((itemPredicate, appliance, id));
+			return new ApplianceHandle { id = id };
+		}
+
+		public void UnregisterAppliance(ApplianceHandle handle) {
+			foreach (var kvp in rulesByPriority) {
+				foreach (var (itemPredicate, app, id) in kvp.Value) {
+					if (id == handle.id) {
+						kvp.Value.Remove((itemPredicate, app, id));
+						return;
+					}
+				}
+			}
 		}
 
 		internal void FillPreVanillaAppliances(Item item, ref List<SmartCursorAppliance> apps) {
@@ -66,7 +87,7 @@ namespace LibSmartCursor.API {
 			}
 
 			foreach (var kvp in rulesByPriority) {
-				foreach (var (itemPredicate, app) in kvp.Value) {
+				foreach (var (itemPredicate, app, id) in kvp.Value) {
 					if (app.Behavior == ApplianceBehavior.PreVanilla && itemPredicate(item)) {
 						apps.Add(app);
 					}
@@ -80,7 +101,7 @@ namespace LibSmartCursor.API {
 			}
 
 			foreach (var kvp in rulesByPriority) {
-				foreach (var (itemPredicate, app) in kvp.Value) {
+				foreach (var (itemPredicate, app, id) in kvp.Value) {
 					if (app.Behavior == ApplianceBehavior.PostVanilla && itemPredicate(item)) {
 						apps.Add(app);
 					}
@@ -94,7 +115,7 @@ namespace LibSmartCursor.API {
 			}
 
 			foreach (var kvp in rulesByPriority) {
-				foreach (var (itemPredicate, app) in kvp.Value) {
+				foreach (var (itemPredicate, app, id) in kvp.Value) {
 					if (itemPredicate(item)) {
 						apps.Add(app);
 					}
