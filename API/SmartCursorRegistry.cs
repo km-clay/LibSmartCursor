@@ -47,13 +47,18 @@ namespace LibSmartCursor.API {
 		/// <param name="itemPredicate">Function that returns true for items this appliance should handle</param>
 		/// <param name="appliance">The appliance instance to register</param>
 		/// <param name="priority">Priority value (lower executes first). Use PRIORITY_* constants or custom values. Expects something between 0 and 100.</param>
+		/// <returns>A handle that can be used to unregister this appliance later</returns>
 		/// <example>
 		/// <code>
-		/// LibSmartCursor.LibSmartCursor.Registry.RegisterAppliance(
+		/// // Register and save the handle for later unregistration
+		/// var handle = LibSmartCursor.LibSmartCursor.Registry.RegisterAppliance(
 		///     item => item.type == ItemID.StaffofRegrowth,
 		///     new MyAppliance(),
 		///     SmartCursorRegistry.PRIORITY_NORMAL
 		/// );
+		///
+		/// // Later, conditionally unregister
+		/// LibSmartCursor.LibSmartCursor.Registry.UnregisterAppliance(handle);
 		/// </code>
 		/// </example>
 		public ApplianceHandle RegisterAppliance(Func<Item,bool> itemPredicate, SmartCursorAppliance appliance, int priority = PRIORITY_NORMAL) {
@@ -70,6 +75,30 @@ namespace LibSmartCursor.API {
 			return new ApplianceHandle { id = id };
 		}
 
+		/// <summary>
+		/// Unregisters a previously registered appliance using its handle.
+		/// This allows dynamic enabling/disabling of smart cursor behaviors without
+		/// requiring conditional logic within the appliance itself.
+		/// </summary>
+		/// <param name="handle">The handle returned from RegisterAppliance</param>
+		/// <example>
+		/// <code>
+		/// // Register in Load()
+		/// ApplianceHandle myHandle;
+		/// public override void Load() {
+		///     myHandle = LibSmartCursor.LibSmartCursor.Registry.RegisterAppliance(
+		///         item => item.type == ItemID.Pickaxe,
+		///         new MyAppliance(),
+		///         SmartCursorRegistry.PRIORITY_NORMAL
+		///     );
+		/// }
+		///
+		/// // Conditionally unregister based on some game state
+		/// if (shouldDisableFeature) {
+		///     LibSmartCursor.LibSmartCursor.Registry.UnregisterAppliance(myHandle);
+		/// }
+		/// </code>
+		/// </example>
 		public void UnregisterAppliance(ApplianceHandle handle) {
 			foreach (var kvp in rulesByPriority) {
 				foreach (var (itemPredicate, app, id) in kvp.Value) {
