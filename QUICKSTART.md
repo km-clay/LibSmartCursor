@@ -3,7 +3,9 @@
 ### 1. Add LibSmartCursor as a dependency
 
 In your mod's `build.txt`, add this line:
-`modReferences = LibSmartCursor`
+```
+modReferences = LibSmartCursor
+```
 
 And in your mod's `csproj` file, add this inbetween the ItemGroup tags:
 ```
