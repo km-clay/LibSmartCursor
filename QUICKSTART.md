@@ -5,6 +5,14 @@
 In your mod's `build.txt`, add this line:
 `modReferences = LibSmartCursor`
 
+And in your mod's `csproj` file, add this inbetween the ItemGroup tags:
+```
+<Reference Include="LibSmartCursor">
+	<HintPath>/path/to/LibSmartCursor.dll</HintPath>
+</Reference>
+```
+The path referenced in the HintPath tags must point to the LibSmartCursor dll file. This can be obtained through tModLoader by extracting it.
+
 ### 2. Create a Smart Cursor Appliance
 
 Let's make a `SmartCursorAppliance`. We'll make it find and target dirt blocks using Smart Cursor.
