@@ -4,11 +4,25 @@ using Terraria;
 using Terraria.ModLoader;
 
 namespace LibSmartCursor.API {
+	internal class ApplianceDebugInfo {
+		internal string ModName;
+		internal string ApplianceName;
+
+		internal ApplianceDebugInfo(string ModName, string ApplianceName) {
+			this.ModName = ModName;
+			this.ApplianceName = ApplianceName;
+		}
+
+		internal static ApplianceDebugInfo Vanilla() {
+			return new ApplianceDebugInfo("Terraria", "VanillaSmartCursor");
+		}
+	}
+
 	/// <summary>
 	/// Handle representing a registered smart cursor appliance.
 	/// Can be used to unregister appliances in the future.
 	/// </summary>
-	public class ApplianceHandle {
+	public struct ApplianceHandle {
 		internal int id;
 	}
 	/// <summary>
@@ -36,7 +50,7 @@ namespace LibSmartCursor.API {
 		public const int PRIORITY_LOW = 75;
 
 
-		private SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance, int)>> rulesByPriority;
+		private SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance, int, ApplianceDebugInfo)>> rulesByPriority;
 
 		/// <summary>
 		/// Registers a smart cursor appliance with the given item predicate and priority.
@@ -64,14 +78,16 @@ namespace LibSmartCursor.API {
 		public ApplianceHandle RegisterAppliance(Func<Item,bool> itemPredicate, SmartCursorAppliance appliance, int priority = PRIORITY_NORMAL) {
 			int id = nextHandleId++;
 			if (rulesByPriority == null) {
-				rulesByPriority = new SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance, int)>>();
+				rulesByPriority = new SortedList<int, List<(Func<Item,bool>, SmartCursorAppliance, int, ApplianceDebugInfo)>>();
 			}
 
 			if (!rulesByPriority.ContainsKey(priority)) {
-				rulesByPriority[priority] = new List<(Func<Item,bool>, SmartCursorAppliance, int)>();
+				rulesByPriority[priority] = new List<(Func<Item,bool>, SmartCursorAppliance, int, ApplianceDebugInfo)>();
 			}
 
-			rulesByPriority[priority].Add((itemPredicate, appliance, id));
+			ApplianceDebugInfo debugInfo = new ApplianceDebugInfo(appliance.GetType().Assembly.GetName().Name, appliance.GetType().Name);
+
+			rulesByPriority[priority].Add((itemPredicate, appliance, id, debugInfo));
 			return new ApplianceHandle { id = id };
 		}
 
@@ -101,38 +117,38 @@ namespace LibSmartCursor.API {
 		/// </example>
 		public void UnregisterAppliance(ApplianceHandle handle) {
 			foreach (var kvp in rulesByPriority) {
-				foreach (var (itemPredicate, app, id) in kvp.Value) {
+				foreach (var (itemPredicate, app, id, debug) in kvp.Value) {
 					if (id == handle.id) {
-						kvp.Value.Remove((itemPredicate, app, id));
+						kvp.Value.Remove((itemPredicate, app, id, debug));
 						return;
 					}
 				}
 			}
 		}
 
-		internal void FillPreVanillaAppliances(Item item, ref List<SmartCursorAppliance> apps) {
+		internal void FillPreVanillaAppliances(Item item, ref List<(SmartCursorAppliance, ApplianceDebugInfo)> apps) {
 			if (rulesByPriority == null) {
 				return;
 			}
 
 			foreach (var kvp in rulesByPriority) {
-				foreach (var (itemPredicate, app, id) in kvp.Value) {
+				foreach (var (itemPredicate, app, id, debug) in kvp.Value) {
 					if (app.Behavior == ApplianceBehavior.PreVanilla && itemPredicate(item)) {
-						apps.Add(app);
+						apps.Add((app,debug));
 					}
 				}
 			}
 		}
 
-		internal void FillPostVanillaAppliances(Item item, ref List<SmartCursorAppliance> apps) {
+		internal void FillPostVanillaAppliances(Item item, ref List<(SmartCursorAppliance,ApplianceDebugInfo)> apps) {
 			if (rulesByPriority == null) {
 				return;
 			}
 
 			foreach (var kvp in rulesByPriority) {
-				foreach (var (itemPredicate, app, id) in kvp.Value) {
+				foreach (var (itemPredicate, app, id, debug) in kvp.Value) {
 					if (app.Behavior == ApplianceBehavior.PostVanilla && itemPredicate(item)) {
-						apps.Add(app);
+						apps.Add((app,debug));
 					}
 				}
 			}
@@ -144,7 +160,7 @@ namespace LibSmartCursor.API {
 			}
 
 			foreach (var kvp in rulesByPriority) {
-				foreach (var (itemPredicate, app, id) in kvp.Value) {
+				foreach (var (itemPredicate, app, id, debug) in kvp.Value) {
 					if (itemPredicate(item)) {
 						apps.Add(app);
 					}

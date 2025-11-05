@@ -8,18 +8,27 @@ using LibSmartCursor.API;
 using Terraria;
 using Terraria.GameContent;
 using Microsoft.Xna.Framework;
+using AlgoLib;
 
 namespace LibSmartCursor
 {
 	// Please read https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Modding-Guide#mod-skeleton-contents for more information about the various files in a mod.
 	public class LibSmartCursor : Mod
 	{
-		public static bool DebugMode { get; set; } = true; // Set to false for release
+		public static bool DebugMode { get; set; } = false;
 
 		public static SmartCursorRegistry Registry { get; private set; }
 
+		internal static ApplianceDebugInfo CurrentDebugInfo { get; set; } = null;
+
 		public override void Load() {
 			Registry = new SmartCursorRegistry();
+
+			// Load debug mode from config
+			var config = ModContent.GetInstance<LibSmartCursorConfig>();
+			if (config != null) {
+				DebugMode = config.ShowDebugOverlay;
+			}
 
 			On_SmartCursorHelper.SmartCursorLookup += SmartCursorLookup_Override;
 		}
@@ -37,19 +46,21 @@ namespace LibSmartCursor
 			}
 
 			SmartCursorContext ctx = SmartCursorContext.FromPlayer(player);
-			List<SmartCursorAppliance> apps = new();
+			List<(SmartCursorAppliance, ApplianceDebugInfo)> apps = new();
 
 			Main.SmartCursorShowing = false;
+			CurrentDebugInfo = null;
 
 			int focusedX = -1, focusedY = -1;
 
 			Registry.FillPreVanillaAppliances(ctx.Item, ref apps);
-			foreach (var preVanillaApp in apps) {
+			foreach (var (preVanillaApp, debugInfo) in apps) {
 				preVanillaApp.ApplySmartCursor(ctx, ref focusedX, ref focusedY);
 				if (focusedX != -1 && focusedY != -1) {
 					if (ctx.RestrictedTiles.Contains(new Point(focusedX, focusedY))) {
 						continue;
 					}
+					CurrentDebugInfo = debugInfo;
 					SetFocus(ctx, focusedX, focusedY);
 					return;
 				}
@@ -66,18 +77,20 @@ namespace LibSmartCursor
 					focusedX = -1;
 					focusedY = -1;
 				} else {
+					CurrentDebugInfo = ApplianceDebugInfo.Vanilla();
 					return;
 				}
 			}
 
 			apps.Clear();
 			Registry.FillPostVanillaAppliances(ctx.Item, ref apps);
-			foreach(var postVanillaApp in apps) {
+			foreach(var (postVanillaApp, debugInfo) in apps) {
 				postVanillaApp.ApplySmartCursor(ctx, ref focusedX, ref focusedY);
 				if (focusedX != -1 && focusedY != -1) {
 					if (ctx.RestrictedTiles.Contains(new Point(focusedX, focusedY))) {
 						continue;
 					}
+					CurrentDebugInfo = debugInfo;
 					SetFocus(ctx, focusedX, focusedY);
 					return;
 				}

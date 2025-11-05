@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using LibSmartCursor.Internal;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
+using AlgoLib.Algo.Graph;
+using AlgoLib.Geometry;
 
 namespace LibSmartCursor.API {
 	/// <summary>
@@ -67,8 +68,8 @@ namespace LibSmartCursor.API {
 		/// <param name="ctx">Context containing player, item, mouse position, reach bounds, and restricted tiles</param>
 		/// <returns>The tile coordinates to target, or null if no valid target found</returns>
 		protected virtual Point? FindTarget(SmartCursorContext ctx) {
-			Point playerTile = (ctx.Player.Center / 16f).ToPoint();
-			Point mouseTile = (ctx.MouseWorld / 16f).ToPoint();
+			Point playerTile = GridUtils.WorldToTile(ctx.Player.Center);
+			Point mouseTile = GridUtils.WorldToTile(ctx.MouseWorld);
 
 			Point? bestTile = null;
 
@@ -77,11 +78,11 @@ namespace LibSmartCursor.API {
 			List<Point> tilesInRing = new();
 			int curRingDist = 0;
 
-			var bfs = new BFSIterator(playerTile, ctx.ReachBounds, maxRadius, square: true);
+			var bfs = new BFSIterator(playerTile, validator: (pnt) => ctx.ReachBounds.Contains(pnt), square: true);
 			while (bfs.HasNext()) {
 				Point tile = bfs.Next();
 
-				int tileChebyshev = Math.Max(Math.Abs(tile.X - playerTile.X), Math.Abs(tile.Y - playerTile.Y));
+				int tileChebyshev = GridUtils.ChebyshevDistance(playerTile, tile);
 
 				if (tileChebyshev > curRingDist) {
 					if (tilesInRing.Count > 0) {

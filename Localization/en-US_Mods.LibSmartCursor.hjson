@@ -1,1 +1,11 @@
+Configs: {
+	LibSmartCursorConfig: {
+		ShowDebugOverlay: {
+			Tooltip: Display which appliance and mod is handling the smart cursor target
+			Label: Show Debug Overlay
+		}
 
+		Headers.Debug: Debug Header
+		DisplayName: Lib Smart Cursor Config
+	}
+}
